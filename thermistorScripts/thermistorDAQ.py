@@ -27,10 +27,10 @@ def tempCalc(voltOut):
 
 # Function to record temperature data into a text file
 def recordFileData(time, temp):
-    time = str(time)
-    temp = str(temp)
+    timeStr = str(time)
+    tempStr = str(temp)
 
-    file.write(time + '\t' + temp + '\n')
+    file.write(timeStr + '\t' + tempStr + '\n')
 
 # Configure plotting parameters
 fig = plt.figure(figsize = (6, 3))
@@ -64,7 +64,11 @@ while True:
     time.sleep(interval)
     t += interval 
 
+    # Temporary solution to stopping the script
+    if t == 5:
+        break
+
 # Stop and close task
+file.close()
 task.stop()
 task.close()
-
