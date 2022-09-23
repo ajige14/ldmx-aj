@@ -34,7 +34,7 @@ task.ai_channels.add_ai_voltage_chan('Dev1/ai0', min_val = 0, max_val = 5)
 task.start()
 
 # Open file for data recording
-fieldNames = ['Time (s)', 'Temperature (C)']
+fieldNames = ['time (s)', 'temperature (C)']
 with open('tempData.csv', 'w') as csvFile:
     csvWriter = csv.DictWriter(csvFile, fieldnames = fieldNames)
     csvWriter.writeheader()
@@ -52,9 +52,11 @@ while True:
     with open('tempData.csv', 'a') as csvFile:
         csvWriter = csv.DictWriter(csvFile, fieldnames = fieldNames)
         data = {
-            'Time (s)': t,
-            'Temperature (C)': temp
+            'time (s)': t,
+            'temperature (C)': temp
         }
+
+        print(f'time (s): {t}, temp (C): {temp}')
 
     if t == stopTime:
         break
