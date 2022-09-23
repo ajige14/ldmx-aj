@@ -1,3 +1,5 @@
+# Script used to get voltage data from the NI DAQ Device and record it into a csv file
+
 import nidaqmx
 import numpy as np
 import csv
