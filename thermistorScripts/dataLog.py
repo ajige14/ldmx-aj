@@ -1,7 +1,8 @@
 import nidaqmx
 import numpy as np
-import matplotlib.pyplot as plt
+import csv
 import time
+
 
 # Function to calculate temperature in celsius given output voltage
 def tempCalc(voltOut):
@@ -25,50 +26,40 @@ def tempCalc(voltOut):
     
     return tempC
 
-# Function to record temperature data into a text file
-def recordFileData(time, temp):
-    timeStr = str(time)
-    tempStr = str(temp)
-
-    file.write(timeStr + '\t' + tempStr + '\n')
-
-# Configure plotting parameters
-fig = plt.figure(figsize = (6, 3))
-ax = fig.add_subplot(1, 1, 1)
-
 # Initialize the nidaqmx task
 task = nidaqmx.Task()
 task.ai_channels.add_ai_voltage_chan('Dev1/ai0', min_val = 0, max_val = 5)
 task.start()
 
 # Open file for data recording
-file = open('tempData.txt', 'w')
+fieldNames = ['Time (s)', 'Temperature (C)']
+with open('tempData.csv', 'w') as csvFile:
+    csvWriter = csv.DictWriter(csvFile, fieldnames = fieldNames)
+    csvWriter.writeheader()
 
 # Assign start time and time interval for recording, both in seconds
 t = 0
 interval = 1
-tList = []
-tempList = []
+stopTime = 5
 
 # Logging temperature data from DAQ Device
 while True:
     voltOut = task.read()
     temp = tempCalc(voltOut)
-    recordFileData(t, temp)
 
-    tList.append(t)
-    tempList.append(temp)
-    ax.plot(tList, tempList, marker = 'o')
-    fig.canvas.draw()
-    
-    time.sleep(interval)
-    t += interval 
+    with open('tempData.csv', 'a') as csvFile:
+        csvWriter = csv.DictWriter(csvFile, fieldnames = fieldNames)
+        data = {
+            'Time (s)': t,
+            'Temperature (C)': temp
+        }
 
-    # Temporary solution to stopping the script
-    if t == 5:
+    if t == stopTime:
         break
+    else:
+        time.sleep(interval)
+        t += interval 
 
 # Stop and close task
-file.close()
 task.stop()
 task.close()
