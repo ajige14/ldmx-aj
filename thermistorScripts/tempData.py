@@ -9,7 +9,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-
 # Function to calculate temperature in celsius given output voltage
 def tempCalc(voltOut):
 
