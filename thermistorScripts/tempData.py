@@ -61,8 +61,9 @@ def animate(frame):
     ax.clear()
     ax.plot(t, temp, marker = 'o')
     ax.set_title('Temperature Graph')
+    ax.set_ylim(-50, 50)
     ax.set_xlabel('time (s)')
-    ax.set_ylable('temperature (C)')
+    ax.set_ylabel('temperature (C)')
     ax.grid()
 
 # Parse command line arguments
@@ -73,7 +74,7 @@ parser.add_argument('-f', '--final_time',         help = 'Final data collection 
 args = parser.parse_args()
 
 # Configuring the logger
-logging.basicConfig(format = '[ %(levelname)s ]: %(message)s', level = logging.DEBUG) 
+logging.basicConfig(format = '[ %(levelname)s ]: %(message)s', level = logging.INFO) 
 
 # Assign start time and time interval for recording, both in seconds
 timeInterval = float(args.time_interval)
