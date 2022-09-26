@@ -31,6 +31,10 @@ def tempCalc(voltOut):
     
     return tempC
 
+# Animation initialization script
+def init():
+    ax.clear()
+
 # Logging temperature data from DAQ Device and real time plotting
 def animate(frame):
     voltOut = task.read()
@@ -61,59 +65,50 @@ def animate(frame):
     ax.set_ylable('temperature (C)')
     ax.grid()
 
-# Animation initialization script
-def init():
-    ax.clear()
+# Parse command line arguments
+parser = argparse.ArgumentParser(description = 'Thermistor Temp Data Collection')
+parser.add_argument('-t', '--time_interval',      help = 'Interval between each data collection, in seconds.')
+parser.add_argument('-f', '--final_time',         help = 'Final data collection time.')
 
+args = parser.parse_args()
 
-def main():
-    # Parse command line arguments
-    parser = argparse.ArgumentParser(description = 'Thermistor Temp Data Collection')
-    parser.add_argument('-t', '--time_interval',      help = 'Interval between each data collection, in seconds.')
-    parser.add_argument('-f', '--final_time',         help = 'Final data collection time.')
+# Configuring the logger
+logging.basicConfig(format = '[ %(levelname)s ]: %(message)s', level = logging.DEBUG) 
 
-    args = parser.parse_args()
+# Assign start time and time interval for recording, both in seconds
+timeInterval = float(args.time_interval)
+aniInterval = int(timeInterval * 1000)
 
-    # Configuring the logger
-    logging.basicConfig(format = '[ %(levelname)s ]: %(message)s', level = logging.DEBUG) 
+if not args.final_time:
+    repeatBool = True
+    numFrames = None
+    logging.info('No final time specified, data collection will continue indefinitely.')
+else:    
+    finalTime = float(args.final_time)
+    numFrames = int((finalTime / timeInterval) + 1)
+    repeatBool = False
 
-    # Assign start time and time interval for recording, both in seconds
-    timeInterval = args.time_interval
-    aniInterval = timeInterval * 1000
+# Initialize the nidaqmx task
+logging.info('Initializing nidaqmx task.')
+task = nidaqmx.Task()
+task.ai_channels.add_ai_voltage_chan('Dev1/ai0', min_val = 0, max_val = 5)
+task.start()
 
-    if not args.final_time:
-        repeatBool = True
-        numFrames = None
-        logging.info('No final time specified, data collection will continue indefinitely.')
-    else:    
-        finalTime = args.final_time
-        numFrames = (finalTime / timeInterval) + 1
-        repeatBool = False
+# Open file for data recording
+logging.info('Opening file tempData.csv for data collection.')
+fieldNames = ['time (s)', 'temperature (C)']
+with open('tempData.csv', 'w') as csvFile:
+    csvWriter = csv.DictWriter(csvFile, fieldnames = fieldNames)
+    csvWriter.writeheader()
 
-    # Initialize the nidaqmx task
-    logging.info('Initializing nidaqmx task.')
-    task = nidaqmx.Task()
-    task.ai_channels.add_ai_voltage_chan('Dev1/ai0', min_val = 0, max_val = 5)
-    task.start()
+# Initialize plotting figure
+fig, ax = plt.subplots()
 
-    # Open file for data recording
-    logging.info('Opening file tempData.csv for data collection.')
-    fieldNames = ['time (s)', 'temperature (C)']
-    with open('tempData.csv', 'w') as csvFile:
-        csvWriter = csv.DictWriter(csvFile, fieldnames = fieldNames)
-        csvWriter.writeheader()
+# Start data collection and animation
+logging.info('Starting data collection and plotting animation.')
+ani = FuncAnimation(fig, animate, init_func = init, interval = aniInterval, frames = numFrames, repeat = repeatBool)
+plt.show()
 
-    # Initialize plotting figure
-    fig, ax = plt.subplots()
-
-    # Start data collection and animation
-    logging.info('Starting data collection and plotting animation.')
-    ani = FuncAnimation(fig, animate, init_func = init, interval = aniInterval, frames = numFrames, repeat = repeatBool)
-    plt.show()
-
-    # Stop and close task
-    task.stop()
-    task.close()
-
-if __name__ == '__main__':
-    main()
+# Stop and close task
+task.stop()
+task.close()
