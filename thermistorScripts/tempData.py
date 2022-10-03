@@ -22,7 +22,7 @@ def tempCalc(voltList):
     R0 = 10000 # 10k Ohm Resistor used for voltage divider
 
     # Calculate thermistor resistance
-    for volt in voltList
+    for volt in voltList:
         Rt = (volt * R0) / (voltIn - volt)
 
         # Calculate temperature in Kelvin 
@@ -67,13 +67,13 @@ def animate(frame):
     data = pd.read_csv('tempData.csv')
     t = data['time (s)']
     temp1 = np.array(data['temp1 (C)']) 
-    temp2 = np.array(data['temp2 (C)']) + 1
-    temp3 = np.array(data['temp3 (C)']) + 2
-    temp4 = np.array(data['temp4 (C)']) + 3
-    temp5 = np.array(data['temp5 (C)']) + 4
-    temp6 = np.array(data['temp6 (C)']) + 5
-    temp7 = np.array(data['temp7 (C)']) + 6
-    temp8 = np.array(data['temp8 (C)']) + 7
+    temp2 = np.array(data['temp2 (C)']) + 2
+    temp3 = np.array(data['temp3 (C)']) + 4
+    temp4 = np.array(data['temp4 (C)']) + 6
+    temp5 = np.array(data['temp5 (C)']) + 8
+    temp6 = np.array(data['temp6 (C)']) + 10
+    temp7 = np.array(data['temp7 (C)']) + 12
+    temp8 = np.array(data['temp8 (C)']) + 14
     
 
     t = t[-50:]
@@ -87,14 +87,14 @@ def animate(frame):
     temp8 = temp8[-50:]
 
     ax.clear()
-    ax.plot(t, temp1, marker = 'o', label = 'Thermistor 1')
-    ax.plot(t, temp2, marker = 'o', label = 'Thermistor 2')
-    ax.plot(t, temp3, marker = 'o', label = 'Thermistor 3')
-    ax.plot(t, temp4, marker = 'o', label = 'Thermistor 4')
-    ax.plot(t, temp5, marker = 'o', label = 'Thermistor 5')
-    ax.plot(t, temp6, marker = 'o', label = 'Thermistor 6')
-    ax.plot(t, temp7, marker = 'o', label = 'Thermistor 7')
-    ax.plot(t, temp8, marker = 'o', label = 'Thermistor 8')
+    ax.plot(t, temp1, marker = 'o', label = 'Thermistor 1', markersize = 3)
+    ax.plot(t, temp2, marker = 'o', label = 'Thermistor 2', markersize = 3)
+    ax.plot(t, temp3, marker = 'o', label = 'Thermistor 3', markersize = 3)
+    ax.plot(t, temp4, marker = 'o', label = 'Thermistor 4', markersize = 3)
+    ax.plot(t, temp5, marker = 'o', label = 'Thermistor 5', markersize = 3)
+    ax.plot(t, temp6, marker = 'o', label = 'Thermistor 6', markersize = 3)
+    ax.plot(t, temp7, marker = 'o', label = 'Thermistor 7', markersize = 3)
+    ax.plot(t, temp8, marker = 'o', label = 'Thermistor 8', markersize = 3)
     ax.legend()
     ax.set_title('Temperature Graph')
     ax.set_ylim(-50, 50)
@@ -129,14 +129,15 @@ else:
 # Initialize the nidaqmx task
 logging.info('Initializing nidaqmx task.')
 task = nidaqmx.Task()
-task.ai_channels.add_ai_voltage_chan('Dev1/ai0', min_val = 0, max_val = 5)
-task.ai_channels.add_ai_voltage_chan('Dev1/ai1', min_val = 0, max_val = 5)
-task.ai_channels.add_ai_voltage_chan('Dev1/ai2', min_val = 0, max_val = 5)
-task.ai_channels.add_ai_voltage_chan('Dev1/ai3', min_val = 0, max_val = 5)
-task.ai_channels.add_ai_voltage_chan('Dev1/ai4', min_val = 0, max_val = 5)
-task.ai_channels.add_ai_voltage_chan('Dev1/ai5', min_val = 0, max_val = 5)
-task.ai_channels.add_ai_voltage_chan('Dev1/ai6', min_val = 0, max_val = 5)
-task.ai_channels.add_ai_voltage_chan('Dev1/ai7', min_val = 0, max_val = 5)
+RSE = nidaqmx.constants.TerminalConfiguration(10083) # Referenced Single-Ended
+task.ai_channels.add_ai_voltage_chan('Dev1/ai0', terminal_config = RSE, min_val = 0, max_val = 5)
+task.ai_channels.add_ai_voltage_chan('Dev1/ai1', terminal_config = RSE, min_val = 0, max_val = 5)
+task.ai_channels.add_ai_voltage_chan('Dev1/ai2', terminal_config = RSE, min_val = 0, max_val = 5)
+task.ai_channels.add_ai_voltage_chan('Dev1/ai3', terminal_config = RSE, min_val = 0, max_val = 5)
+task.ai_channels.add_ai_voltage_chan('Dev1/ai4', terminal_config = RSE, min_val = 0, max_val = 5)
+task.ai_channels.add_ai_voltage_chan('Dev1/ai5', terminal_config = RSE, min_val = 0, max_val = 5)
+task.ai_channels.add_ai_voltage_chan('Dev1/ai6', terminal_config = RSE, min_val = 0, max_val = 5)
+task.ai_channels.add_ai_voltage_chan('Dev1/ai7', terminal_config = RSE, min_val = 0, max_val = 5)
 task.start()
 
 # Open file for data recording
@@ -147,7 +148,8 @@ with open('tempData.csv', 'w') as csvFile:
     csvWriter.writeheader()
 
 # Initialize plotting figure
-fig, ax = plt.subplots()
+fig = plt.figure(figsize = (14, 7))
+ax = fig.add_subplot(111)
 
 # Start data collection and animation
 logging.info('Starting data collection and plotting animation.')
