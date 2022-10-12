@@ -26,7 +26,7 @@ def tempCalc(voltList):
         Rt = (volt * R0) / (voltIn - volt)
 
         # Calculate temperature in Kelvin 
-        tempK = 1 / (a + (b * np.log(Rt)) + (c * np.log(Rt))**3)
+        tempK = 1 / (a + (b * np.log(Rt)) + c * (np.log(Rt))**3)
 
         # Convert from Kelvin to Celsius
         tempC = tempK - 273.15
