@@ -12,6 +12,7 @@ from matplotlib.animation import FuncAnimation
 # Function to calculate temperature using whole calibration given output voltage
 def totalCalc(voltList):
     totalTempList = []
+    resList = []
 
     # Steinhart-Hart Equation Coefficients
     a = 1.262740397e-3
@@ -24,6 +25,7 @@ def totalCalc(voltList):
     # Calculate thermistor resistance
     for volt in voltList:
         Rt = (volt * R0) / (voltIn - volt)
+        resList.append(resList)
 
         # Calculate temperature in Kelvin 
         tempK = 1 / (a + (b * np.log(Rt)) + c * (np.log(Rt))**3)
@@ -33,7 +35,7 @@ def totalCalc(voltList):
 
         totalTempList.append(tempC)
     
-    return totalTempList
+    return totalTempList, resList
 
 # Function to calculate temperature using individual calibration given output voltage
 def indCalc(voltList):
@@ -76,17 +78,17 @@ def indCalc(voltList):
     
     return indTempList
 
-
 # Animation initialization script
 def init():
     ax1.clear()
     ax2.clear()
     ax3.clear()
+    ax4.clear()
 
 # Logging temperature data from DAQ Device and real time plotting
 def animate(frame):
     voltOutList = task.read()
-    totalTempList = totalCalc(voltOutList)
+    totalTempList, resList = totalCalc(voltOutList)
     indTempList = indCalc(voltOutList)
     difList = np.array(indTempList) - np.array(totalTempList)
     
@@ -119,7 +121,15 @@ def animate(frame):
             'dif5': difList[4],
             'dif6': difList[5],
             'dif7': difList[6],
-            'dif8': difList[7]
+            'dif8': difList[7],
+            'res1': resList[0],
+            'res2': resList[1],
+            'res3': resList[2],
+            'res4': resList[3],
+            'res5': resList[4],
+            'res6': resList[5],
+            'res7': resList[6],
+            'res8': resList[7]
         }
         csvWriter.writerow(data)
         logging.info(f'time: {time} \n'
@@ -128,7 +138,9 @@ def animate(frame):
         f'          total1, {round(totalTempList[0], 3)}; total2, {round(totalTempList[1], 3)}; total3, {round(totalTempList[2], 3)}; total4, {round(totalTempList[3], 3)} \n'
         f'          total5, {round(totalTempList[4], 3)}; total6, {round(totalTempList[5], 3)}; total7, {round(totalTempList[6], 3)}; total8, {round(totalTempList[7], 3)} \n\n'
         f'          dif1, {round(difList[0], 3)}; dif2, {round(difList[1], 3)}; dif3, {round(difList[2], 3)}; dif4, {round(difList[3], 3)} \n'
-        f'          dif5, {round(difList[4], 3)}; dif6, {round(difList[5], 3)}; dif7, {round(difList[6], 3)}; dif8, {round(difList[7], 3)} \n'
+        f'          dif5, {round(difList[4], 3)}; dif6, {round(difList[5], 3)}; dif7, {round(difList[6], 3)}; dif8, {round(difList[7], 3)} \n\n'
+        f'          res1, {round(resList[0], 3)}; res2, {round(resList[1], 3)}; res3, {round(resList[2], 3)}; res4, {round(resList[3], 3)} \n'
+        f'          res5, {round(resList[4], 3)}; res6, {round(resList[5], 3)}; res7, {round(resList[6], 3)}; res8, {round(resList[7], 3)} \n'
         )
 
     data = pd.read_csv(fileName)
@@ -160,6 +172,15 @@ def animate(frame):
     dif7 = np.array(data['dif7']) + 12
     dif8 = np.array(data['dif8']) + 14
 
+    res1 = np.array(data['res1']) 
+    res2 = np.array(data['res2']) 
+    res3 = np.array(data['res3']) 
+    res4 = np.array(data['res4']) 
+    res5 = np.array(data['res5']) 
+    res6 = np.array(data['res6']) 
+    res7 = np.array(data['res7']) 
+    res8 = np.array(data['res8']) 
+
     t = t[-50:]
     ind1 = ind1[-50:]
     ind2 = ind2[-50:]
@@ -187,6 +208,15 @@ def animate(frame):
     dif6 = dif6[-50:]
     dif7 = dif7[-50:]
     dif8 = dif8[-50:]
+
+    res1 = res1[-50:]
+    res2 = res2[-50:]
+    res3 = res3[-50:]
+    res4 = res4[-50:]
+    res5 = res5[-50:]
+    res6 = res6[-50:]
+    res7 = res7[-50:]
+    res8 = res8[-50:]
 
     ax1.clear()
     ax1.plot(t, ind1, marker = 'o', label = 'Thermistor 1', markersize = 3)
@@ -236,6 +266,20 @@ def animate(frame):
     ax3.set_ylabel('temperature (C)')
     ax3.grid()
 
+    ax4.clear()
+    ax4.plot(t, res1, marker = 'o', label = 'Thermistor 1', markersize = 3)
+    ax4.plot(t, res2, marker = 'o', label = 'Thermistor 2', markersize = 3)
+    ax4.plot(t, res3, marker = 'o', label = 'Thermistor 3', markersize = 3)
+    ax4.plot(t, res4, marker = 'o', label = 'Thermistor 4', markersize = 3)
+    ax4.plot(t, res5, marker = 'o', label = 'Thermistor 5', markersize = 3)
+    ax4.plot(t, res6, marker = 'o', label = 'Thermistor 6', markersize = 3)
+    ax4.plot(t, res7, marker = 'o', label = 'Thermistor 7', markersize = 3)
+    ax4.plot(t, res8, marker = 'o', label = 'Thermistor 8', markersize = 3)
+    ax4.legend()
+    ax4.set_title('Resistance of Each Thermistor')
+    ax4.set_xlabel('time (s)')
+    ax4.set_ylabel('resistance (ohm)')
+    ax4.grid()
 
 # Parse command line arguments
 parser = argparse.ArgumentParser(description = 'Thermistor Temp Data Collection')
@@ -282,7 +326,8 @@ fieldNames = [
     'time (s)', 
     'ind1', 'ind2', 'ind3', 'ind4', 'ind5', 'ind6', 'ind7', 'ind8',
     'total1', 'total2', 'total3', 'total4', 'total5', 'total6', 'total7', 'total8',
-    'dif1', 'dif2', 'dif3', 'dif4', 'dif5', 'dif6', 'dif7', 'dif8'
+    'dif1', 'dif2', 'dif3', 'dif4', 'dif5', 'dif6', 'dif7', 'dif8',
+    'res1', 'res2', 'res3', 'res4', 'res5', 'res6', 'res7', 'res8'
     ]
 with open(fileName, 'w') as csvFile:
     csvWriter = csv.DictWriter(csvFile, fieldnames = fieldNames)
@@ -293,6 +338,7 @@ fig = plt.figure(figsize = (14, 14))
 ax1 = fig.add_subplot(221)
 ax2 = fig.add_subplot(222)
 ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
 
 # Start data collection and animation
 logging.info('Starting data collection and plotting animation.')
