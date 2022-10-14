@@ -1,5 +1,4 @@
 # Script used to get temp data from the NI DAQ Device and record it into a csv file while plotting it
-
 import csv
 import nidaqmx
 import argparse
@@ -12,11 +11,12 @@ from matplotlib.animation import FuncAnimation
 # Function to calculate temperature in celsius given output voltage
 def tempCalc(voltList):
     tempList = []
+    resList = []
 
     # Steinhart-Hart Equation Coefficients
-    a = 0.00058563
-    b = 0.000286668
-    c = 0.000000163801
+    a = 1.262740397e-3
+    b = 1.968014123e-4
+    c = 3.483432557e-7
 
     voltIn = 5
     R0 = 10000 # 10k Ohm Resistor used for voltage divider
@@ -24,6 +24,7 @@ def tempCalc(voltList):
     # Calculate thermistor resistance
     for volt in voltList:
         Rt = (volt * R0) / (voltIn - volt)
+        resList.append(Rt)
 
         # Calculate temperature in Kelvin 
         tempK = 1 / (a + (b * np.log(Rt)) + c * (np.log(Rt))**3)
@@ -33,7 +34,7 @@ def tempCalc(voltList):
 
         tempList.append(tempC)
     
-    return tempList
+    return tempList, resList
 
 # Animation initialization script
 def init():
@@ -42,11 +43,11 @@ def init():
 # Logging temperature data from DAQ Device and real time plotting
 def animate(frame):
     voltOutList = task.read()
-    tempList = tempCalc(voltOutList)
+    tempList, resList = tempCalc(voltOutList)
 
     time = frame * timeInterval
 
-    with open('tempData.csv', 'a', newline = '') as csvFile:
+    with open(fileName, 'a', newline = '') as csvFile:
         csvWriter = csv.DictWriter(csvFile, fieldnames = fieldNames)
         data = {
             'time (s)': time,
@@ -57,14 +58,22 @@ def animate(frame):
             'temp5 (C)': tempList[4],
             'temp6 (C)': tempList[5],
             'temp7 (C)': tempList[6],
-            'temp8 (C)': tempList[7]
+            'temp8 (C)': tempList[7],
+            'res1 (ohm)': resList[0],
+            'res2 (ohm)': resList[1],
+            'res3 (ohm)': resList[2],
+            'res4 (ohm)': resList[3],
+            'res5 (ohm)': resList[4],
+            'res6 (ohm)': resList[5],
+            'res7 (ohm)': resList[6],
+            'res8 (ohm)': resList[7]
         }
         csvWriter.writerow(data)
         logging.info(f'time: {time} \n'
         f'          temp1, {round(tempList[0], 3)}; temp2, {round(tempList[1], 3)}; temp3, {round(tempList[2], 3)}; temp4, {round(tempList[3], 3)} \n'
         f'          temp5, {round(tempList[4], 3)}; temp6, {round(tempList[5], 3)}; temp7, {round(tempList[6], 3)}; temp8, {round(tempList[7], 3)}')
 
-    data = pd.read_csv('tempData.csv')
+    data = pd.read_csv(fileName)
     t = data['time (s)']
     temp1 = np.array(data['temp1 (C)']) 
     temp2 = np.array(data['temp2 (C)']) + 2
@@ -75,7 +84,6 @@ def animate(frame):
     temp7 = np.array(data['temp7 (C)']) + 12
     temp8 = np.array(data['temp8 (C)']) + 14
     
-
     t = t[-50:]
     temp1 = temp1[-50:]
     temp2 = temp2[-50:]
@@ -102,11 +110,11 @@ def animate(frame):
     ax.set_ylabel('temperature (C)')
     ax.grid()
 
-
 # Parse command line arguments
 parser = argparse.ArgumentParser(description = 'Thermistor Temp Data Collection')
 parser.add_argument('-t', '--time_interval',      help = 'Interval between each data collection, in seconds.')
 parser.add_argument('-f', '--final_time',         help = 'Final data collection time.')
+parser.add_argument('-n', '--file_name',          help = 'Name of file to record data into.')
 
 args = parser.parse_args()
 
@@ -141,9 +149,13 @@ task.ai_channels.add_ai_voltage_chan('Dev1/ai7', terminal_config = RSE, min_val 
 task.start()
 
 # Open file for data recording
-logging.info('Opening file tempData.csv for data collection.')
-fieldNames = ['time (s)', 'temp1 (C)', 'temp2 (C)', 'temp3 (C)', 'temp4 (C)', 'temp5 (C)', 'temp6 (C)', 'temp7 (C)', 'temp8 (C)']
-with open('tempData.csv', 'w') as csvFile:
+fileName = str(args.file_name)
+logging.info(f'Opening file {fileName} for data collection.')
+fieldNames = [
+    'time (s)', 'temp1 (C)', 'temp2 (C)', 'temp3 (C)', 'temp4 (C)', 'temp5 (C)', 'temp6 (C)', 'temp7 (C)', 'temp8 (C)',
+    'res1 (ohm)', 'res2 (ohm)', 'res3 (ohm)', 'res4 (ohm)', 'res5 (ohm)', 'res6 (ohm)', 'res7 (ohm)', 'res8 (ohm)'
+]
+with open(fileName, 'w') as csvFile:
     csvWriter = csv.DictWriter(csvFile, fieldnames = fieldNames)
     csvWriter.writeheader()
 
