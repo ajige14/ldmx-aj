@@ -68,17 +68,18 @@ def animate(frame):
             'res9': resDev2[0],     'res10': resDev2[1],    'res11': resDev2[2],   'res12': resDev2[3],
             'res13': resDev2[4],   'res14': resDev2[5],   'res15': resDev2[6],   'res16': resDev2[7],
 
-            'res17': resDev3[16],   'res18': resDev3[17],   'res19': resDev3[18],   'res20': resDev3[19],
-            'res21': resDev3[20],   'res22': resDev3[21],   'res23': resDev3[22],   'res24': resDev3[23]
+            'res17': resDev3[0],   'res18': resDev3[1],   'res19': resDev3[2],   'res20': resDev3[3],
+            'res21': resDev3[4],   'res22': resDev3[5],   'res23': resDev3[6],   'res24': resDev3[7]
         }
         csvWriter.writerow(data)
         logging.info(f'time: {time} \n'
-        f'          temp1,  {round(tempDev1[0], 3)}; temp2,  {round(tempDev1[1], 3)}; temp3,  {round(tempDev1[2], 3)}; temp4,  {round(tempDev1[3], 3)} \n'
-        f'          temp5,  {round(tempDev1[4], 3)}; temp6,  {round(tempDev1[5], 3)}; temp7,  {round(tempDev1[6], 3)}; temp8,  {round(tempDev1[7], 3)}\n'
-        f'          temp9,  {round(tempDev2[0], 3)}; temp10, {round(tempDev2[1], 3)}; temp11, {round(tempDev2[2], 3)}; temp12, {round(tempDev2[3], 3)}\n'
-        f'          temp13, {round(tempDev2[4], 3)}; temp14, {round(tempDev2[5], 3)}; temp15, {round(tempDev2[6], 3)}; temp16, {round(tempDev2[7], 3)}\n'
-        f'          temp17, {round(tempDev3[0], 3)}; temp18, {round(tempDev3[1], 3)}; temp19, {round(tempDev3[2], 3)}; temp20, {round(tempDev3[3], 3)}\n'
-        f'          temp21, {round(tempDev3[4], 3)}; temp22, {round(tempDev3[5], 3)}; temp23, {round(tempDev3[6], 3)}; temp24, {round(tempDev3[7], 3)}\n'
+        f'          temp1,  {tempDev1[0]:.3f}; temp2,  {tempDev1[1]:.3f}; temp3,  {tempDev1[2]:.3f}; temp4,  {tempDev1[3]:.3f} \n'
+        f'          temp5,  {tempDev1[4]:.3f}; temp6,  {tempDev1[5]:.3f}; temp7,  {tempDev1[6]:.3f}; temp8,  {tempDev1[7]:.3f}\n'
+        f'          temp9,  {tempDev2[0]:.3f}; temp10, {tempDev2[1]:.3f}; temp11, {tempDev2[2]:.3f}; temp12, {tempDev2[3]:.3f}\n'
+        f'          temp13, {tempDev2[4]:.3f}; temp14, {tempDev2[5]:.3f}; temp15, {tempDev2[6]:.3f}; temp16, {tempDev2[7]:.3f}\n'
+        f'          temp17, {tempDev3[0]:.3f}; temp18, {tempDev3[1]:.3f}; temp19, {tempDev3[2]:.3f}; temp20, {tempDev3[3]:.3f}\n'
+        f'          temp21, {tempDev3[4]:.3f}; temp22, {tempDev3[5]:.3f}; temp23, {tempDev3[6]:.3f}; temp24, {tempDev3[7]:.3f}\n'
+        
         )
 
     data = pd.read_csv(fileName)
@@ -120,7 +121,7 @@ def animate(frame):
     ax1.plot(t, temp8, marker = 'o', linewidth = 1, label = 'Thermistor 8', markersize = 2)
     ax1.legend()
     ax1.set_title('Thermistors 1 - 8')
-    ax1.set_ylim(0, 25)
+    ax1.set_ylim(0, 30)
     ax1.set_xlabel('time (s)')
     ax1.set_ylabel('temperature (C)')
 
@@ -165,7 +166,7 @@ logging.basicConfig(format = '[ %(levelname)s ]: %(message)s', level = logging.I
 timeInterval = float(args.time_interval)
 aniInterval = int(timeInterval * 1000)
 
-if not args.final_time:
+if not args.end_time:
     repeatBool = True
     numFrames = None
     logging.info('No final time specified, data collection will continue indefinitely.')
@@ -234,7 +235,7 @@ with open(fileName, 'w') as csvFile:
 # Initialize plotting figure
 fig = plt.figure(figsize = (18, 6))
 fig.tight_layout()
-fig.subplot_adjust(left = 0.05, right = 0.975, wspace = 0.1, top = 0.925)
+fig.subplots_adjust(left = 0.05, right = 0.975, wspace = 0.1, top = 0.925)
 ax1 = fig.add_subplot(131)
 ax2 = fig.add_subplot(132, sharey = ax1)
 ax3 = fig.add_subplot(133, sharey = ax1)
