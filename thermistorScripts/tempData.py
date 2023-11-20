@@ -1,5 +1,4 @@
 # Script used to get temp data from the NI DAQ Device and record it into a csv file while plotting it
-
 import csv
 import nidaqmx
 import argparse
